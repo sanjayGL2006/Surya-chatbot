@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Chat - ChatSphere{% endblock %}
+{% block content %}
+<div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand">
+                <span class="brand-icon">💬</span>
+                <span class="brand-name">Surya chatbot</span>
+            </div>
+            <button class="icon-btn" id="closeSidebar" title="Close">✕</button>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar">{{ username[0]|upper }}</div>
+            <div class="user-info">
+                <div class="user-name">{{ username }}{% if is_admin %} <span class="admin-badge">Admin</span>{% endif %}</div>
+                <div class="user-status"><span class="status-dot online"></span> Online</div>
+            </div>
+            <button class="icon-btn" id="themeToggle" title="Toggle theme">🌙</button>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-header">
+                <h3>Rooms</h3>
+                <button class="icon-btn-sm" id="addRoomBtn" title="Create room">＋</button>
+            </div>
+            <div class="room-list" id="roomList">
+                {% for room in rooms %}
+                <div class="room-item {% if loop.first %}active{% endif %}" data-room="{{ room.name }}" data-type="group">
+                    <span class="room-icon">#</span>
+                    <span class="room-name">{{ room.name }}</span>
+                    <span class="unread-badge" data-room-badge="{{ room.name }}" style="display:none;">0</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="add-room-form" id="addRoomForm" style="display:none;">
+                <input type="text" id="newRoomName" placeholder="Room name..." maxlength="30">
+                <button class="btn btn-sm btn-primary" id="createRoomBtn">Create</button>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-header">
+                <h3>Direct Messages</h3>
+            </div>
+            <div class="user-list" id="userList">
+                {% for user in users %}
+                    {% if user.username != username %}
+                    <div class="room-item" data-room="" data-type="private" data-user="{{ user.username }}">
+                        <span class="avatar avatar-sm">{{ user.username[0]|upper }}</span>
+                        <span class="room-name">{{ user.username }}</span>
+                        <span class="status-dot offline user-dot" data-user-dot="{{ user.username }}"></span>
+                        <span class="unread-badge" data-room-badge="" style="display:none;">0</span>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="btn btn-outline btn-block">🚪 Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main chat area -->
+    <main class="chat-main">
+        <header class="chat-header">
+            <button class="icon-btn" id="openSidebar" title="Menu">☰</button>
+            <div class="chat-title">
+                <span class="chat-title-icon" id="chatTitleIcon">#</span>
+                <div>
+                    <h2 id="chatRoomName">General</h2>
+                    <p class="chat-subtitle" id="chatSubtitle">Public room</p>
+                </div>
+            </div>
+            <div class="online-summary">
+                <span class="status-dot online"></span>
+                <span id="onlineCount">0</span> online
+            </div>
+        </header>
+
+        <div class="messages-container" id="messagesContainer">
+            <div class="messages-list" id="messagesList">
+                <!-- Messages injected here -->
+            </div>
+            <div class="typing-indicator" id="typingIndicator" style="display:none;"></div>
+        </div>
+
+        <footer class="chat-footer">
+            <div class="upload-progress" id="uploadProgress" style="display:none;">
+                <div class="upload-progress-bar" id="uploadProgressBar"></div>
+            </div>
+            <form id="messageForm" class="message-form">
+                <button type="button" class="icon-btn" id="emojiBtn" title="Emoji">😊</button>
+                <button type="button" class="icon-btn" id="attachBtn" title="Attach file">📎</button>
+                <input type="file" id="fileInput" hidden accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.docx,.doc,.txt">
+                <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." autocomplete="off" maxlength="2000">
+                <button type="submit" class="btn btn-primary send-btn" title="Send">➤</button>
+            </form>
+            <div class="emoji-picker" id="emojiPicker" style="display:none;"></div>
+        </footer>
+    </main>
+</div>
+
+<!-- Toast notifications -->
+<div class="toast-container" id="toastContainer"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    const CURRENT_USER = "{{ username }}";
+</script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}
